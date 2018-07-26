@@ -5,6 +5,8 @@ import pickle
 from bs4 import BeautifulSoup 
 
 
+##xbmc.log("message",level=xbmc.LOGERROR)
+
 addon           = xbmcaddon.Addon(id='plugin.video.ufcfightpass')
 addon_url       = sys.argv[0]
 addon_handle    = int(sys.argv[1])
@@ -266,12 +268,15 @@ def build_menu(itemData):
         # append My Queue menu item - refactor to allow pulling other single action based options like search
         item = xbmcgui.ListItem(label='My Queue') 
         listing.append(('{0}?action=queue'.format(addon_url), item, True))
+        #xbmc.log('{0}?action=queue'.format(addon_url),level=xbmc.LOGERROR)
 
         item = xbmcgui.ListItem(label='My Favourites') 
-        listing.append(('{0}?action=favourites'.format(addon_url), item, True))        
+        listing.append(('{0}?action=favourites'.format(addon_url), item, True))
+        #xbmc.log('{0}?action=favourites'.format(addon_url),level=xbmc.LOGERROR)        
 
         item = xbmcgui.ListItem(label='My History') 
         listing.append(('{0}?action=history'.format(addon_url), item, True))
+        #xbmc.log('{0}?action=history'.format(addon_url),level=xbmc.LOGERROR)   
         
         
    
@@ -481,9 +486,15 @@ def get_pers(url, pid=None, ptype=None, count=0):
         params['id'] = pid
         params['type'] = ptype
         
+    if ptype:
+        params['type'] = ptype
+    
     data = get_data(url, params=params)
-
+    
+    #xbmc.log("params are" + str(params),level=xbmc.LOGERROR)
+    
     if 'result' in data and data['result'] == 'unauthorized': # status still 200??
+        
         if count < 3:  # allow 3 retries on failure before bailing
             # we need to re-auth and update token
             print('UFCFP: get_pers re-auth for token (retry %s/3)' %(count+1))
@@ -713,8 +724,9 @@ def favourites_get():
     return []    
     
 def history_get():
-    q_data = get_pers('https://apis.neulion.com/personalization_ufc/v1/watchhistory/list')
+    q_data = get_pers('https://apis.neulion.com/personalization_ufc/v1/watchhistory/list',pid="1", ptype="program")
     if 'contents' in q_data:
+        #xbmc.log("Qdata is {0}".format(q_data),level=xbmc.LOGERROR)
         q_ids = [q['id'] for q in q_data['contents']]
 
         if len(q_ids) > 0:
